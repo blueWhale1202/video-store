@@ -14,29 +14,24 @@ export async function POST(req: Request) {
         );
     }
 
-    // Create new Svix instance with secret
     const wh = new Webhook(SIGNING_SECRET);
 
-    // Get headers
     const headerPayload = await headers();
     const svix_id = headerPayload.get("svix-id");
     const svix_timestamp = headerPayload.get("svix-timestamp");
     const svix_signature = headerPayload.get("svix-signature");
 
-    // If there are no headers, error out
     if (!svix_id || !svix_timestamp || !svix_signature) {
         return new Response("Error: Missing Svix headers", {
             status: 400,
         });
     }
 
-    // Get body
     const payload = await req.json();
     const body = JSON.stringify(payload);
 
     let evt: WebhookEvent;
 
-    // Verify payload with headers
     try {
         evt = wh.verify(body, {
             "svix-id": svix_id,
