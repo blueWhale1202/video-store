@@ -1,5 +1,7 @@
 "use client";
 
+import { ResponsiveDialog } from "@/components/responsive-dialog";
+import { StudioUploader } from "@/components/studio-uploader";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
 import { Loader, Plus } from "lucide-react";
@@ -10,7 +12,7 @@ export const StudioUploadModal = () => {
     const create = trpc.videos.create.useMutation({
         onSuccess: () => {
             utils.studio.getMany.invalidate();
-            toast.success("Video created");
+            // toast.success("Video created");
         },
         onError: (err) => {
             toast.error(err.message ?? "Failed to create video");
@@ -18,13 +20,30 @@ export const StudioUploadModal = () => {
     });
 
     return (
-        <Button
-            variant="secondary"
-            onClick={() => create.mutate()}
-            disabled={create.isPending}
-        >
-            {create.isPending ? <Loader className="animate-spin" /> : <Plus />}
-            Create
-        </Button>
+        <>
+            <ResponsiveDialog
+                title="Upload a video"
+                open={!!create.data?.url}
+                onOpenChange={() => create.reset()}
+            >
+                {create.data?.url ? (
+                    <StudioUploader endpoint={create.data.url} />
+                ) : (
+                    <Loader className="animate-spin" />
+                )}
+            </ResponsiveDialog>
+            <Button
+                variant="secondary"
+                onClick={() => create.mutate()}
+                disabled={create.isPending}
+            >
+                {create.isPending ? (
+                    <Loader className="animate-spin" />
+                ) : (
+                    <Plus />
+                )}
+                Create
+            </Button>
+        </>
     );
 };
