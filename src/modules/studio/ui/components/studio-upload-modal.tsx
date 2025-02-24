@@ -5,6 +5,7 @@ import { StudioUploader } from "@/components/studio-uploader";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/trpc/client";
 import { Loader, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export const StudioUploadModal = () => {
@@ -19,6 +20,15 @@ export const StudioUploadModal = () => {
         },
     });
 
+    const router = useRouter();
+
+    const onSuccess = () => {
+        if (!create.data?.video) return;
+
+        create.reset();
+        router.push(`/studio/videos/${create.data.video.id}`);
+    };
+
     return (
         <>
             <ResponsiveDialog
@@ -27,7 +37,10 @@ export const StudioUploadModal = () => {
                 onOpenChange={() => create.reset()}
             >
                 {create.data?.url ? (
-                    <StudioUploader endpoint={create.data.url} />
+                    <StudioUploader
+                        endpoint={create.data.url}
+                        onSuccess={onSuccess}
+                    />
                 ) : (
                     <Loader className="animate-spin" />
                 )}
