@@ -23,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { videoUpdateSchema } from "@/db/schema";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
@@ -34,6 +35,7 @@ import {
     CopyCheck,
     Globe2,
     ImagePlus,
+    Loader,
     Lock,
     MoreHorizontal,
     RotateCcw,
@@ -49,6 +51,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { THUMBNAIL_FALLBACK } from "../../constants";
+import { ThumbnailGenerateModal } from "../components/thumbnail-generate-modal";
 import { ThumbnailUploadModal } from "../components/thumbnail-upload-modal";
 import { VideoPlayer } from "../components/video-player";
 
@@ -56,20 +59,80 @@ type Props = {
     videoId: string;
 };
 
-export const FormSectionSuspense = ({ videoId }: Props) => {
-    <ErrorBoundary fallback={<div>Failed to load form section</div>}>
-        <Suspense fallback={<div>Loading form section...</div>}>
-            <FormSection videoId={videoId} />
-        </Suspense>
-    </ErrorBoundary>;
+export const FormSection = ({ videoId }: Props) => {
+    return (
+        <ErrorBoundary fallback={<div>Failed to load form section</div>}>
+            <Suspense fallback={<FormSectionSkeleton />}>
+                <FormSectionSuspense videoId={videoId} />
+            </Suspense>
+        </ErrorBoundary>
+    );
+};
+
+export const FormSectionSkeleton = () => {
+    return (
+        <div>
+            <div className="mb-6 flex items-center justify-between">
+                <div className="space-y-2">
+                    <Skeleton className="h-7 w-32" />
+                    <Skeleton className="h-4 w-40" />
+                </div>
+                <Skeleton className="h-7 w-20" />
+            </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+                <div className="space-y-8 lg:col-span-3">
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-16" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-24" />
+                        <Skeleton className="h-[220px] w-full" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-[84px] w-[152px]" />
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
+                </div>
+                <div className="flex flex-col gap-y-8 lg:col-span-2">
+                    <div className="flex flex-col gap-4 overflow-hidden rounded-xl bg-[#f9f9f9]">
+                        <Skeleton className="aspect-video" />
+                        <div className="space-y-6 p-4">
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-20" />
+                                <Skeleton className="h-5 w-full" />
+                            </div>
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-5 w-32" />
+                            </div>
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-5 w-32" />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-5 w-32" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 type FormData = z.infer<typeof videoUpdateSchema>;
 
-export const FormSection = ({ videoId }: Props) => {
+export const FormSectionSuspense = ({ videoId }: Props) => {
     const { isCopied, copyToClipboard } = useCopyToClipboard();
     const router = useRouter();
     const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
+    const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
     const [video] = trpc.videos.getOne.useSuspenseQuery({
         id: videoId,
@@ -113,6 +176,30 @@ export const FormSection = ({ videoId }: Props) => {
         },
     });
 
+    const generateTitle = trpc.videos.generateTitle.useMutation({
+        onSuccess() {
+            toast.success("Background job started", {
+                description: "This may take some time",
+            });
+        },
+        onError(err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        },
+    });
+
+    const generateDescription = trpc.videos.generateDescription.useMutation({
+        onSuccess() {
+            toast.success("Background job started", {
+                description: "This may take some time",
+            });
+        },
+        onError(err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        },
+    });
+
     const form = useForm<FormData>({
         resolver: zodResolver(videoUpdateSchema),
         defaultValues: video,
@@ -135,6 +222,11 @@ export const FormSection = ({ videoId }: Props) => {
                 open={thumbnailModalOpen}
                 onOpenChange={setThumbnailModalOpen}
             />
+            <ThumbnailGenerateModal
+                videoId={video.id}
+                open={generateModalOpen}
+                onOpenChange={setGenerateModalOpen}
+            />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <div className="mb-6 flex items-center justify-between">
@@ -147,13 +239,22 @@ export const FormSection = ({ videoId }: Props) => {
                             </p>
                         </div>
                         <div className="flex items-center gap-x-2">
-                            <Button type="submit" disabled={update.isPending}>
+                            <Button
+                                type="submit"
+                                disabled={
+                                    update.isPending || !form.formState.isDirty
+                                }
+                            >
                                 Save
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon">
-                                        <MoreHorizontal />
+                                        {remove.isPending ? (
+                                            <Loader className="animate-spin text-muted-foreground" />
+                                        ) : (
+                                            <MoreHorizontal />
+                                        )}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
@@ -172,7 +273,32 @@ export const FormSection = ({ videoId }: Props) => {
                                 name="title"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Title</FormLabel>
+                                        <FormLabel>
+                                            <div className="flex items-center gap-x-2">
+                                                Title
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="size-6 rounded-full [&_svg]:size-3"
+                                                    disabled={
+                                                        generateTitle.isPending ||
+                                                        !video.muxTrackId
+                                                    }
+                                                    onClick={() =>
+                                                        generateTitle.mutate({
+                                                            id: videoId,
+                                                        })
+                                                    }
+                                                >
+                                                    {generateTitle.isPending ? (
+                                                        <Loader className="animate-spin text-muted-foreground" />
+                                                    ) : (
+                                                        <Sparkles />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </FormLabel>
                                         <FormControl>
                                             <Input
                                                 {...field}
@@ -188,7 +314,34 @@ export const FormSection = ({ videoId }: Props) => {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Description</FormLabel>
+                                        <FormLabel>
+                                            <div className="flex items-center gap-x-2">
+                                                Description
+                                                <Button
+                                                    type="button"
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="size-6 rounded-full [&_svg]:size-3"
+                                                    disabled={
+                                                        generateDescription.isPending ||
+                                                        !video.muxTrackId
+                                                    }
+                                                    onClick={() =>
+                                                        generateDescription.mutate(
+                                                            {
+                                                                id: videoId,
+                                                            },
+                                                        )
+                                                    }
+                                                >
+                                                    {generateDescription.isPending ? (
+                                                        <Loader className="animate-spin text-muted-foreground" />
+                                                    ) : (
+                                                        <Sparkles />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                        </FormLabel>
                                         <FormControl>
                                             <Textarea
                                                 {...field}
@@ -246,7 +399,13 @@ export const FormSection = ({ videoId }: Props) => {
                                                             <ImagePlus />
                                                             Change
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem>
+                                                        <DropdownMenuItem
+                                                            onClick={() =>
+                                                                setGenerateModalOpen(
+                                                                    true,
+                                                                )
+                                                            }
+                                                        >
                                                             <Sparkles />
                                                             AI-generate
                                                         </DropdownMenuItem>

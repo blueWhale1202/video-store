@@ -8,7 +8,6 @@ import {
     VideoAssetReadyWebhookEvent,
     VideoAssetTrackReadyWebhookEvent,
 } from "@mux/mux-node/resources/webhooks.mjs";
-import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { utapi } from "../../uploadthing/core";
@@ -87,14 +86,14 @@ export const POST = async (request: Request) => {
                     tempPreviewUrl,
                 ]);
 
-            if (!uploadedThumbnail.data || !uploadedPreview.data) {
-                throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-            }
+            // if (!uploadedThumbnail.data || !uploadedPreview.data) {
+            //     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+            // }
 
             const { ufsUrl: thumbnailUrl, key: thumbnailKey } =
-                uploadedThumbnail.data;
+                uploadedThumbnail.data || { ufsUrl: undefined, key: undefined };
             const { ufsUrl: previewUrl, key: previewKey } =
-                uploadedPreview.data;
+                uploadedPreview.data || { ufsUrl: undefined, key: undefined };
 
             await db
                 .update(videos)

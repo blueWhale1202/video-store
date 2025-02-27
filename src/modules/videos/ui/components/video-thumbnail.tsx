@@ -14,7 +14,6 @@ export const VideoThumbnail = ({
     previewUrl,
     duration,
 }: Props) => {
-    console.log(formatDuration(duration));
     return (
         <div className="group relative">
             <div className="relative aspect-video w-full overflow-hidden rounded-xl">

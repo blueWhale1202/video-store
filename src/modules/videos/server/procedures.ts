@@ -2,6 +2,7 @@ import { utapi } from "@/app/api/uploadthing/core";
 import { db } from "@/db";
 import { videos, videoUpdateSchema } from "@/db/schema";
 import { getMuxThumbnailUrl, mux } from "@/lib/mux";
+import { workflow } from "@/lib/workflow";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
@@ -109,6 +110,10 @@ export const videoRouter = createTRPCRouter({
                 await utapi.deleteFiles([video.thumbnailKey, video.previewKey]);
             }
 
+            if (video.muxAssetId) {
+                await mux.video.assets.delete(video.muxAssetId);
+            }
+
             return video;
         }),
     restoreThumbnail: protectedProcedure
@@ -157,5 +162,52 @@ export const videoRouter = createTRPCRouter({
                 .returning();
 
             return video;
+        }),
+    generateTitle: protectedProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId } = ctx.user;
+            const { id } = input;
+
+            const { workflowRunId } = await workflow.trigger({
+                url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/title`,
+                body: { userId, videoId: id },
+                retries: 1,
+            });
+
+            return workflowRunId;
+        }),
+    generateDescription: protectedProcedure
+        .input(z.object({ id: z.string().uuid() }))
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId } = ctx.user;
+            const { id } = input;
+
+            const { workflowRunId } = await workflow.trigger({
+                url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/description`,
+                body: { userId, videoId: id },
+                retries: 1,
+            });
+
+            return workflowRunId;
+        }),
+    generateThumbnail: protectedProcedure
+        .input(
+            z.object({
+                id: z.string().uuid(),
+                prompt: z.string().min(10).max(200),
+            }),
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { id: userId } = ctx.user;
+            const { id, prompt } = input;
+
+            const { workflowRunId } = await workflow.trigger({
+                url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/thumbnail`,
+                body: { userId, videoId: id, prompt },
+                retries: 1,
+            });
+
+            return workflowRunId;
         }),
 });
