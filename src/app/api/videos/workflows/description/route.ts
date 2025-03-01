@@ -46,7 +46,7 @@ export const { POST } = serve(async (context) => {
         return text;
     });
 
-    const { body } = await context.api.openai.call("generate-title", {
+    const { body } = await context.api.openai.call("generate-description", {
         token: process.env.OPENAI_API_KEY!,
         operation: "chat.completions.create",
         body: {

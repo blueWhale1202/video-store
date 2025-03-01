@@ -17,7 +17,7 @@ export const ThumbnailUploadModal = ({
 
     const onUploadComplete = () => {
         utils.studio.getMany.invalidate();
-        utils.videos.getOne.invalidate({ id: videoId });
+        utils.studio.getOne.invalidate({ id: videoId });
         onOpenChange(false);
     };
 

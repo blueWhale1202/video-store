@@ -27,7 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { videoUpdateSchema } from "@/db/schema";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
-import { snakeToTitle } from "@/lib/utils";
+import { getVideoUrl, snakeToTitle } from "@/lib/utils";
 import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -134,7 +134,7 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
     const [thumbnailModalOpen, setThumbnailModalOpen] = useState(false);
     const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
-    const [video] = trpc.videos.getOne.useSuspenseQuery({
+    const [video] = trpc.studio.getOne.useSuspenseQuery({
         id: videoId,
     });
     const [categories] = trpc.categories.getMany.useSuspenseQuery();
@@ -143,7 +143,7 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
     const update = trpc.videos.update.useMutation({
         onSuccess(data) {
             utils.studio.getMany.invalidate();
-            utils.videos.getOne.invalidate({ id: data.id });
+            utils.studio.getOne.invalidate({ id: data.id });
             toast.success("Video updated");
         },
         onError(err) {
@@ -167,7 +167,7 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
     const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
         onSuccess() {
             utils.studio.getMany.invalidate();
-            utils.videos.getOne.invalidate({ id: video.id });
+            utils.studio.getOne.invalidate({ id: video.id });
             toast.success("Thumbnail restored");
         },
         onError(err) {
@@ -213,7 +213,7 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
         remove.mutate({ id: video.id });
     };
 
-    const fullUrl = `${process.env.NEXT_PUBLIC_APP_URL}/videos/${video.id}`;
+    const fullUrl = getVideoUrl(video.id);
 
     return (
         <>
