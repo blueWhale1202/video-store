@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import MuxPlayer from "@mux/mux-player-react";
 import { THUMBNAIL_FALLBACK } from "../../constants";
 
@@ -26,4 +27,8 @@ export const VideoPlayer = ({
             onPlay={onPlay}
         />
     );
+};
+
+export const VideoPlayerSkeleton = () => {
+    return <Skeleton className="aspect-video rounded-xl" />;
 };

@@ -6,15 +6,20 @@ import { useAuth } from "@clerk/nextjs";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { VideoBanner } from "../components/video-banner";
-import { VideoPlayer } from "../components/video-player";
-import { VideoTopRow } from "../components/video-top-row";
+import { VideoPlayer, VideoPlayerSkeleton } from "../components/video-player";
+import { VideoTopRow, VideoTopRowSkeleton } from "../components/video-top-row";
 
 type Props = {
     id: string;
 };
 
 export const VideoSectionSkeleton = () => {
-    return <div>Loading...</div>;
+    return (
+        <>
+            <VideoPlayerSkeleton />
+            <VideoTopRowSkeleton />
+        </>
+    );
 };
 
 export const VideoSection = ({ id }: Props) => {

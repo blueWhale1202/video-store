@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatViews } from "@/lib/utils";
 import { VideoGetOneOutput } from "../../types";
 import { VideoDescription } from "./video-description";
@@ -35,6 +36,27 @@ export const VideoTopRow = ({ video }: Props) => {
                 expandedDate={expandedDate}
                 description={video.description}
             />
+        </div>
+    );
+};
+
+export const VideoTopRowSkeleton = () => {
+    return (
+        <div className="mt-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+                <Skeleton className="h-6 w-4/5 md:w-2/5" />
+            </div>
+            <div className="flex w-full items-center justify-between">
+                <div className="flex w-[70%] items-center gap-3">
+                    <Skeleton className="size-10 shrink-0 rounded-full" />
+                    <div className="flex w-full flex-col gap-2">
+                        <Skeleton className="h-5 w-4/5 md:w-2/6" />
+                        <Skeleton className="h-5 w-3/5 md:w-1/5" />
+                    </div>
+                </div>
+                <Skeleton className="h-9 w-2/6 rounded-full md:w-1/6" />
+            </div>
+            <div className="h-[120px] w-full" />
         </div>
     );
 };

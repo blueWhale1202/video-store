@@ -37,7 +37,7 @@ export const UserAvatar = ({
             onClick={onClick}
         >
             <AvatarImage src={imageUrl} alt={name} />
-            <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{name[0]?.toUpperCase() || "A"}</AvatarFallback>
         </Avatar>
     );
 };
