@@ -8,6 +8,7 @@ import {
     VideoAssetReadyWebhookEvent,
     VideoAssetTrackReadyWebhookEvent,
 } from "@mux/mux-node/resources/webhooks.mjs";
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import { utapi } from "../../uploadthing/core";
@@ -44,104 +45,79 @@ export const POST = async (request: Request) => {
         SIGNIN_SECRET,
     );
 
-    switch (payload.type as WebhookEvent["type"]) {
-        case "video.asset.created": {
-            const data = payload.data as VideoAssetCreatedWebhookEvent["data"];
+    const payloadType = payload.type as WebhookEvent["type"];
 
-            if (!data.upload_id) {
-                return new Response("No upload ID found", { status: 400 });
-            }
+    if (payloadType === "video.asset.created") {
+        const data = payload.data as VideoAssetCreatedWebhookEvent["data"];
 
-            await db
-                .update(videos)
-                .set({
-                    muxAssetId: data.id,
-                    muxStatus: data.status,
-                })
-                .where(eq(videos.muxUploadId, data.upload_id));
-            break;
-        }
-        case "video.asset.ready": {
-            const data = payload.data as VideoAssetReadyWebhookEvent["data"];
-            const playbackId = data.playback_ids?.[0].id;
-
-            if (!data.upload_id) {
-                return new Response("No upload ID found", { status: 400 });
-            }
-
-            const duration = data.duration
-                ? Math.floor(data.duration * 1000)
-                : 0;
-
-            if (!playbackId) {
-                return new Response("Missing playback ID", { status: 400 });
-            }
-
-            const tempThumbnailUrl = getMuxThumbnailUrl(playbackId);
-            const tempPreviewUrl = getMuxPreviewUrl(playbackId);
-
-            const [uploadedThumbnail, uploadedPreview] =
-                await utapi.uploadFilesFromUrl([
-                    tempThumbnailUrl,
-                    tempPreviewUrl,
-                ]);
-
-            // if (!uploadedThumbnail.data || !uploadedPreview.data) {
-            //     throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-            // }
-
-            const { ufsUrl: thumbnailUrl, key: thumbnailKey } =
-                uploadedThumbnail.data || { ufsUrl: undefined, key: undefined };
-            const { ufsUrl: previewUrl, key: previewKey } =
-                uploadedPreview.data || { ufsUrl: undefined, key: undefined };
-
-            await db
-                .update(videos)
-                .set({
-                    muxStatus: data.status,
-                    muxPlaybackId: playbackId,
-                    muxAssetId: data.id,
-                    thumbnailUrl,
-                    thumbnailKey,
-                    previewUrl,
-                    previewKey,
-                    duration,
-                })
-                .where(eq(videos.muxUploadId, data.upload_id));
-            break;
+        if (!data.upload_id) {
+            return new Response("No upload ID found", { status: 400 });
         }
 
-        case "video.asset.errored": {
-            const data = payload.data as VideoAssetErroredWebhookEvent["data"];
+        await db
+            .update(videos)
+            .set({
+                muxAssetId: data.id,
+                muxStatus: data.status,
+            })
+            .where(eq(videos.muxUploadId, data.upload_id));
+    }
 
-            if (!data.upload_id) {
-                return new Response("No upload ID found", { status: 400 });
-            }
+    if (payloadType === "video.asset.ready") {
+        const data = payload.data as VideoAssetReadyWebhookEvent["data"];
+        const playbackId = data.playback_ids?.[0].id;
 
-            await db
-                .update(videos)
-                .set({
-                    muxStatus: data.status,
-                })
-                .where(eq(videos.muxUploadId, data.upload_id));
-            break;
+        if (!data.upload_id) {
+            return new Response("No upload ID found", { status: 400 });
         }
 
-        case "video.asset.deleted": {
-            const data = payload.data as VideoAssetDeletedWebhookEvent["data"];
+        const duration = data.duration ? Math.floor(data.duration * 1000) : 0;
 
-            if (!data.upload_id) {
-                return new Response("No upload ID found", { status: 400 });
-            }
-
-            await db
-                .delete(videos)
-                .where(eq(videos.muxUploadId, data.upload_id));
-
-            break;
+        if (!playbackId) {
+            return new Response("Missing playback ID", { status: 400 });
         }
 
-        case "video.asset.track.ready": {
+        const tempThumbnailUrl = getMuxThumbnailUrl(playbackId);
+        const tempPreviewUrl = getMuxPreviewUrl(playbackId);
+
+        const [uploadedThumbnail, uploadedPreview] =
+            await utapi.uploadFilesFromUrl([tempThumbnailUrl, tempPreviewUrl]);
+
+        if (!uploadedThumbnail.data || !uploadedPreview.data) {
+            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+        }
+
+        const { ufsUrl: thumbnailUrl, key: thumbnailKey } =
+            uploadedThumbnail.data;
+        const { ufsUrl: previewUrl, key: previewKey } = uploadedPreview.data;
+
+        await db
+            .update(videos)
+            .set({
+                muxStatus: data.status,
+                muxPlaybackId: playbackId,
+                muxAssetId: data.id,
+                thumbnailUrl,
+                thumbnailKey,
+                previewUrl,
+                previewKey,
+                duration,
+            })
+            .where(eq(videos.muxUploadId, data.upload_id));
+    }
+
+    if (payloadType === "video.asset.deleted") {
+        const data = payload.data as VideoAssetDeletedWebhookEvent["data"];
+
+        if (!data.upload_id) {
+            return new Response("No upload ID found", { status: 400 });
+        }
+
+        await db.delete(videos).where(eq(videos.muxUploadId, data.upload_id));
+    }
+
+    if (payloadType === "video.asset.track.ready") {
+        {
             const data =
                 payload.data as VideoAssetTrackReadyWebhookEvent["data"] & {
                     // missing data.asset_id in video.asset.track.ready webhook event
@@ -164,10 +140,22 @@ export const POST = async (request: Request) => {
                     muxTrackStatus: status,
                 })
                 .where(eq(videos.muxAssetId, assetId));
-
-            break;
         }
     }
 
+    if (payloadType === "video.asset.errored") {
+        const data = payload.data as VideoAssetErroredWebhookEvent["data"];
+
+        if (!data.upload_id) {
+            return new Response("No upload ID found", { status: 400 });
+        }
+
+        await db
+            .update(videos)
+            .set({
+                muxStatus: data.status,
+            })
+            .where(eq(videos.muxUploadId, data.upload_id));
+    }
     return new Response("Webhook received", { status: 200 });
 };
