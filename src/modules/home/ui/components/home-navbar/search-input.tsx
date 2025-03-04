@@ -3,10 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { SearchIcon, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export const SearchInput = () => {
+    return (
+        <Suspense fallback={null}>
+            <SearchInputSuspense />
+        </Suspense>
+    );
+};
+
+export const SearchInputSuspense = () => {
     const searchParams = useSearchParams();
     const [value, setValue] = useState(
         () => searchParams.get("query")?.toString() ?? "",

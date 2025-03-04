@@ -11,13 +11,13 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 type Props = {
-    categoryId?: string;
+    userId: string;
 };
 
-export const HomeVideosSectionSuspense = ({ categoryId }: Props) => {
+export const VideosSectionSuspense = ({ userId }: Props) => {
     const [videos, query] = trpc.videos.getMany.useSuspenseInfiniteQuery(
         {
-            categoryId,
+            userId,
             limit: DEFAULT_LIMIT,
         },
         {
@@ -27,7 +27,7 @@ export const HomeVideosSectionSuspense = ({ categoryId }: Props) => {
 
     return (
         <div>
-            <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                 {videos.pages
                     .flatMap((page) => page.items)
                     .map((video) => (
@@ -43,9 +43,9 @@ export const HomeVideosSectionSuspense = ({ categoryId }: Props) => {
     );
 };
 
-export const HomeVideosSectionSkeleton = () => {
+export const VideosSectionSkeleton = () => {
     return (
-        <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {Array.from({ length: 18 }).map((_, i) => (
                 <VideoGridCardSkeleton key={i} />
             ))}
@@ -53,11 +53,11 @@ export const HomeVideosSectionSkeleton = () => {
     );
 };
 
-export const HomeVideosSection = ({ categoryId }: Props) => {
+export const VideosSection = ({ userId }: Props) => {
     return (
-        <ErrorBoundary fallback={<div>Error</div>} key={categoryId}>
-            <Suspense fallback={<HomeVideosSectionSkeleton />}>
-                <HomeVideosSectionSuspense categoryId={categoryId} />
+        <ErrorBoundary fallback={<div>Error</div>}>
+            <Suspense fallback={<VideosSectionSkeleton />}>
+                <VideosSectionSuspense userId={userId} />
             </Suspense>
         </ErrorBoundary>
     );

@@ -9,7 +9,7 @@ export const HomeNavbar = () => {
         <nav className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center bg-white pl-2 pr-5">
             <div className="flex flex-shrink-0 items-center">
                 <SidebarTrigger />
-                <Link href="/">
+                <Link prefetch href="/" className="hidden md:block">
                     <div className="flex items-center gap-1 p-4">
                         <Image
                             src="/logo.svg"

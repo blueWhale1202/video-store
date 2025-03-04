@@ -13,7 +13,7 @@ type Props = {
 
 export const PlaylistGridCard = ({ data }: Props) => {
     return (
-        <Link href={`/playlists/${data.id}`}>
+        <Link prefetch href={`/playlists/${data.id}`}>
             <div className="group flex w-full flex-col gap-2">
                 <PlaylistThumbnail
                     imageUrl={data.thumbnailURl || THUMBNAIL_FALLBACK}

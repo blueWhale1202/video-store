@@ -18,12 +18,8 @@ export const { POST } = serve(async (context) => {
 
     const { thumbnailUrl, thumbnailKey, previewUrl, previewKey } =
         await context.run("upload-images", async () => {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-
             const tempThumbnailUrl = getMuxThumbnailUrl(playbackId);
             const tempPreviewUrl = getMuxPreviewUrl(playbackId);
-
-            await new Promise((resolve) => setTimeout(resolve, 5000));
 
             const [uploadedThumbnail, uploadedPreview] =
                 await utapi.uploadFilesFromUrl([

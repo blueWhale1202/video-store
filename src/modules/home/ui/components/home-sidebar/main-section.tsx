@@ -61,6 +61,7 @@ export const MainSection = () => {
                                 asChild
                             >
                                 <Link
+                                    prefetch
                                     href={item.url}
                                     className="flex items-center gap-4"
                                 >
