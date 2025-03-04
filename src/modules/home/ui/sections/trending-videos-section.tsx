@@ -23,7 +23,7 @@ export const TrendingVideosSectionSuspense = () => {
 
     return (
         <div>
-            <div className="3xl:grid-cols-5 4xl:grid-cols-6 grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6">
                 {videos.pages
                     .flatMap((page) => page.items)
                     .map((video) => (
@@ -41,7 +41,7 @@ export const TrendingVideosSectionSuspense = () => {
 
 export const TrendingVideosSectionSkeleton = () => {
     return (
-        <div className="3xl:grid-cols-5 4xl:grid-cols-6 grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 4xl:grid-cols-6">
             {Array.from({ length: 18 }).map((_, i) => (
                 <VideoGridCardSkeleton key={i} />
             ))}
