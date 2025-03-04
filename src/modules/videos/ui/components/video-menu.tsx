@@ -15,11 +15,7 @@ type Props = {
     onRemove?: () => void;
 };
 
-export const VideoMenu = ({
-    videoId,
-    variant = "secondary",
-    onRemove,
-}: Props) => {
+export const VideoMenu = ({ videoId, variant = "ghost", onRemove }: Props) => {
     const onShare = () => {
         const fullUrl = getVideoUrl(videoId);
         navigator.clipboard.writeText(fullUrl);

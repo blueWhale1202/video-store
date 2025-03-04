@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatDuration } from "@/lib/utils";
 import Image from "next/image";
 
@@ -34,6 +35,14 @@ export const VideoThumbnail = ({
             <div className="absolute bottom-2 right-2 rounded bg-black/80 px-1 py-0.5 text-xs font-medium text-white">
                 {formatDuration(duration)}
             </div>
+        </div>
+    );
+};
+
+export const VideoThumbnailSkeleton = () => {
+    return (
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl">
+            <Skeleton className="size-full" />
         </div>
     );
 };

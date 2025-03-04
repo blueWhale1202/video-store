@@ -164,6 +164,18 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
         },
     });
 
+    const revalidate = trpc.videos.revalidate.useMutation({
+        onSuccess() {
+            utils.studio.getMany.invalidate();
+            utils.studio.getOne.invalidate({ id: video.id });
+            toast.success("Video revalidated");
+        },
+        onError(err) {
+            console.error(err);
+            toast.error("Something went wrong");
+        },
+    });
+
     const restoreThumbnail = trpc.videos.restoreThumbnail.useMutation({
         onSuccess() {
             utils.studio.getMany.invalidate();
@@ -258,6 +270,13 @@ export const FormSectionSuspense = ({ videoId }: Props) => {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        onClick={() =>
+                                            revalidate.mutate({ id: videoId })
+                                        }
+                                    >
+                                        <RotateCcw /> Revalidate
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={onRemove}>
                                         <Trash /> Delete
                                     </DropdownMenuItem>

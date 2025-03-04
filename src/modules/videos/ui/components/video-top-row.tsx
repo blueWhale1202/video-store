@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate, formatViews } from "@/lib/utils";
+import { formatDate, formatNumber } from "@/lib/utils";
 import { VideoGetOneOutput } from "../../types";
 import { VideoDescription } from "./video-description";
 import { VideoMenu } from "./video-menu";
@@ -11,7 +11,9 @@ type Props = {
 };
 
 export const VideoTopRow = ({ video }: Props) => {
-    const { compactViews, expandedViews } = formatViews(video.viewCount);
+    const { compact: compactViews, expanded: expandedViews } = formatNumber(
+        video.viewCount,
+    );
     const { compactDate, expandedDate } = formatDate(video.createAt);
 
     return (

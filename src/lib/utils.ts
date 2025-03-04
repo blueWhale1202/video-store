@@ -21,16 +21,16 @@ export function getVideoUrl(videoId: string) {
     return `${process.env.NEXT_PUBLIC_APP_URL}/videos/${videoId}`;
 }
 
-export function formatViews(views: number) {
-    const compactViews = Intl.NumberFormat("en", {
+export function formatNumber(views: number) {
+    const compact = Intl.NumberFormat("en", {
         notation: "compact",
     }).format(views);
 
-    const expandedViews = Intl.NumberFormat("en", {
+    const expanded = Intl.NumberFormat("en", {
         notation: "standard",
     }).format(views);
 
-    return { compactViews, expandedViews };
+    return { compact, expanded };
 }
 
 export function formatDate(date: Date) {
