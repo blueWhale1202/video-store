@@ -41,6 +41,7 @@ export const VideoSectionSuspense = ({ id }: Props) => {
     const createView = trpc.videoViews.create.useMutation({
         onSuccess() {
             utils.videos.getOne.invalidate({ id });
+            utils.playlists.getHistory.invalidate();
         },
     });
 

@@ -14,16 +14,9 @@ import { trpc } from "@/trpc/client";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-type Props = {
-    query?: string;
-    categoryId?: string;
-};
-
-export const ResultsSectionSuspense = ({ query, categoryId }: Props) => {
-    const [results, resultQuery] = trpc.search.getMany.useSuspenseInfiniteQuery(
+export const LikedVideosSectionSuspense = () => {
+    const [videos, query] = trpc.playlists.getLiked.useSuspenseInfiniteQuery(
         {
-            query,
-            categoryId,
             limit: DEFAULT_LIMIT,
         },
         {
@@ -34,54 +27,50 @@ export const ResultsSectionSuspense = ({ query, categoryId }: Props) => {
     return (
         <>
             <div className="flex flex-col gap-4 gap-y-10 md:hidden">
-                {results.pages
+                {videos.pages
                     .flatMap((page) => page.items)
                     .map((video) => (
                         <VideoGridCard key={video.id} data={video} />
                     ))}
             </div>
-
             <div className="hidden flex-col gap-4 md:flex">
-                {results.pages
+                {videos.pages
                     .flatMap((page) => page.items)
                     .map((video) => (
                         <VideoRowCard key={video.id} data={video} />
                     ))}
             </div>
             <InfiniteScroll
-                hasNextPage={resultQuery.hasNextPage}
-                fetchNextPage={resultQuery.fetchNextPage}
-                isFetchingNextPage={resultQuery.isFetchingNextPage}
+                hasNextPage={query.hasNextPage}
+                fetchNextPage={query.fetchNextPage}
+                isFetchingNextPage={query.isFetchingNextPage}
             />
         </>
     );
 };
 
-export const ResultsSectionSkeleton = () => {
+export const LikedVideosSectionSkeleton = () => {
     return (
-        <div>
-            <div className="hidden flex-col gap-4 md:flex">
-                {Array.from({ length: 5 }).map((_, index) => (
-                    <VideoRowCardSkeleton key={index} />
-                ))}
-            </div>
-            <div className="flex flex-col gap-4 gap-y-10 p-4 pt-6 md:hidden">
-                {Array.from({ length: 5 }).map((_, index) => (
+        <>
+            <div className="flex flex-col gap-4 gap-y-10 md:hidden">
+                {Array.from({ length: 6 }).map((_, index) => (
                     <VideoGridCardSkeleton key={index} />
                 ))}
             </div>
-        </div>
+            <div className="hidden flex-col gap-4 md:flex">
+                {Array.from({ length: 6 }).map((_, index) => (
+                    <VideoRowCardSkeleton key={index} />
+                ))}
+            </div>
+        </>
     );
 };
 
-export const ResultsSection = ({ query, categoryId }: Props) => {
+export const LikedVideosSection = () => {
     return (
-        <ErrorBoundary
-            fallback={<div>ResultsSection error </div>}
-            key={`${query}-${categoryId}`}
-        >
-            <Suspense fallback={<ResultsSectionSkeleton />}>
-                <ResultsSectionSuspense query={query} categoryId={categoryId} />
+        <ErrorBoundary fallback={<div>Error</div>}>
+            <Suspense fallback={<LikedVideosSectionSkeleton />}>
+                <LikedVideosSectionSuspense />
             </Suspense>
         </ErrorBoundary>
     );

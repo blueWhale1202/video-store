@@ -11,6 +11,7 @@ import {
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { HistoryIcon, ListVideo, LucideIcon, ThumbsUp } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type Item = {
     title: string;
@@ -22,19 +23,19 @@ type Item = {
 const items: Item[] = [
     {
         title: "History",
-        url: "/playlist/history",
+        url: "/playlists/history",
         icon: HistoryIcon,
         auth: true,
     },
     {
         title: "Liked Videos",
-        url: "/playlist/liked",
+        url: "/playlists/liked",
         icon: ThumbsUp,
         auth: true,
     },
     {
         title: "All playlists",
-        url: "/playlist",
+        url: "/playlists",
         icon: ListVideo,
         auth: true,
     },
@@ -43,6 +44,7 @@ const items: Item[] = [
 export const PersonalSection = () => {
     const { isSignedIn } = useAuth();
     const clerk = useClerk();
+    const pathname = usePathname();
 
     return (
         <SidebarGroup>
@@ -53,7 +55,7 @@ export const PersonalSection = () => {
                         <SidebarMenuItem key={item.url}>
                             <SidebarMenuButton
                                 tooltip={item.title}
-                                isActive={false}
+                                isActive={pathname === item.url}
                                 onClick={(e) => {
                                     if (!isSignedIn && item.auth) {
                                         e.preventDefault();
