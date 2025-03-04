@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { videos } from "@/db/schema";
-import { getMuxPreviewUrl, getMuxThumbnailUrl, mux } from "@/lib/mux";
+import { mux } from "@/lib/mux";
+import { workflow } from "@/lib/workflow";
 import {
     VideoAssetCreatedWebhookEvent,
     VideoAssetDeletedWebhookEvent,
@@ -8,10 +9,8 @@ import {
     VideoAssetReadyWebhookEvent,
     VideoAssetTrackReadyWebhookEvent,
 } from "@mux/mux-node/resources/webhooks.mjs";
-import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
-import { utapi } from "../../uploadthing/core";
 
 const SIGNIN_SECRET = process.env.MUX_WEBHOOK_SECRET!;
 
@@ -77,33 +76,10 @@ export const POST = async (request: Request) => {
             return new Response("Missing playback ID", { status: 400 });
         }
 
-        const tempThumbnailUrl = getMuxThumbnailUrl(playbackId);
-        const tempPreviewUrl = getMuxPreviewUrl(playbackId);
-
-        const [uploadedThumbnail, uploadedPreview] =
-            await utapi.uploadFilesFromUrl([tempThumbnailUrl, tempPreviewUrl]);
-
-        if (!uploadedThumbnail.data || !uploadedPreview.data) {
-            throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-        }
-
-        const { ufsUrl: thumbnailUrl, key: thumbnailKey } =
-            uploadedThumbnail.data;
-        const { ufsUrl: previewUrl, key: previewKey } = uploadedPreview.data;
-
-        await db
-            .update(videos)
-            .set({
-                muxStatus: data.status,
-                muxPlaybackId: playbackId,
-                muxAssetId: data.id,
-                thumbnailUrl,
-                thumbnailKey,
-                previewUrl,
-                previewKey,
-                duration,
-            })
-            .where(eq(videos.muxUploadId, data.upload_id));
+        await workflow.trigger({
+            url: `${process.env.UPSTASH_WORKFLOW_URL!}/api/videos/workflows/upload-images`,
+            body: { data, playbackId, duration },
+        });
     }
 
     if (payloadType === "video.asset.deleted") {
