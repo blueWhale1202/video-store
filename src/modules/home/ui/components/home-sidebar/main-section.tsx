@@ -26,7 +26,7 @@ const items: Item[] = [
     },
     {
         title: "Subscriptions",
-        url: "/feed/subscriptions",
+        url: "/feed/subscribed",
         icon: PlaySquare,
         auth: true,
     },

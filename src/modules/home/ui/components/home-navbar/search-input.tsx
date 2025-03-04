@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SearchIcon, X } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -12,7 +12,6 @@ export const SearchInput = () => {
         () => searchParams.get("query")?.toString() ?? "",
     );
     const router = useRouter();
-    const pathname = usePathname();
 
     const onSearch = useDebouncedCallback((value: string) => {
         const params = new URLSearchParams(searchParams);
@@ -21,7 +20,10 @@ export const SearchInput = () => {
         } else {
             params.delete("query");
         }
-        router.push(`${pathname}?${params.toString()}`);
+
+        router.push(
+            `${process.env.NEXT_PUBLIC_APP_URL!}/search?${params.toString()}`,
+        );
     }, 300);
 
     const onChange = (value: string) => {
