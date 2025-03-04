@@ -10,5 +10,5 @@ export function getMuxThumbnailUrl(playbackId: string) {
 }
 
 export function getMuxPreviewUrl(playbackId: string) {
-    return `https://image.mux.com/${playbackId}/animated.gif`;
+    return `https://image.mux.com/${playbackId}/animated.gif?width=640&fps=30`;
 }
