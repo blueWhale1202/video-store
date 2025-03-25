@@ -1,42 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📼 Video Store
 
-## Getting Started
+## 🚀 Overview
 
-First, run the development server:
+Video Store is a modern, full-featured video streaming platform that allows users to upload, manage, and watch videos with a rich set of tools tailored for creators and viewers. This project explores advanced Next.js 15 and React 19 features, including server-side prefetching, Suspense, AI integrations, video processing pipelines, and a powerful module-based architecture.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Whether you're building a YouTube alternative, a private content platform, or a niche streaming service, this boilerplate provides the foundation to get started quickly.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Key Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 🎥 Video Playback & Processing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Advanced Video Player**: Supports multiple quality levels and controls.
+- **Real-time Processing**: Powered by Mux for smooth streaming and transcoding.
+- **Smart Thumbnail Generation**: Automatically generate visual previews.
+- **Video Transcription**: Convert speech to text automatically.
+- **AI Title & Description Generator**: Use AI to assist in content creation.
 
-## Learn More
+### 🧠 Creator Studio
 
-To learn more about Next.js, take a look at the following resources:
+- **Metrics Dashboard**: View video stats and engagement insights.
+- **Playlist Management**: Organize videos into custom playlists.
+- **Watch History**: Automatically track user history.
+- **Like & Subscribe System**: Basic social features to engage your audience.
+- **Comment System**: Enable interaction between users.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 📦 Architecture & Backend
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Modular Architecture**: Scalable and maintainable structure.
+- **tRPC Integration**: End-to-end type-safe API calls.
+- **Background Jobs**: Offload processing-heavy tasks.
+- **PostgreSQL + DrizzleORM**: Reliable and modern database setup.
+- **Authentication**: Secure user login and access control.
 
-## Deploy on Vercel
+### 💻 Frontend Experience
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Next.js 15 with App Router**: Fully SSR/SSG and RSC enabled.
+- **React 19**: Cutting-edge React features and performance.
+- **Suspense Support**: Smooth user experience with async data.
+- **Server Component Prefetching**: Faster initial page loads.
+- **Tailwind CSS + Shadcn UI**: Clean, accessible, and responsive design.
+- **Fully Responsive**: Optimized for mobile, tablet, and desktop.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏁 Why Video Store?
 
-## Run Ngrok local
+Video Store is built to demonstrate how powerful modern full-stack tools have become. From seamless real-time processing to AI-enhanced content creation, this boilerplate helps you launch fast while keeping codebase maintainability and performance in mind.
 
-```bash
-ngrok http --url=sure-mighty-polecat.ngrok-free.app 3000
-```
+Whether you're a developer experimenting with video infrastructure or an entrepreneur starting a content platform, Video Store gives you the launchpad you need.
+
+---
+
+🌟 **Get started with Video Store today and revolutionize the way content is created and consumed!**
